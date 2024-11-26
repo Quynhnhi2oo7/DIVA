@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Ký</title>
+    <title>Gửi Khiếu Nại</title>
 </head>
 <body>
-    <h1>Đăng Ký</h1>
-    <form method="post">
+    <h1>Gửi Khiếu Nại</h1>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Đăng Ký</button>
+        <button type="submit">Gửi khiếu nại</button>
     </form>
 </body>
 </html>
