@@ -1,4 +1,18 @@
 from django.db import models
+from django import forms
+
+class NguoiDung(models.Model):
+    VaiTro_CHOICES = [
+        ('Nhân viên', 'Nhân viên'),
+        ('Khách hàng', 'Khách hàng'),
+    ]
+    MaUser = models.CharField(max_length=10, primary_key=True, editable=False)
+    Username = models.CharField(max_length=100)
+    Password = models.CharField(max_length=30)
+    Email = models.EmailField(max_length=100)
+    VaiTro = models.CharField(max_length=20, choices=VaiTro_CHOICES, default='Khách hàng')
+    def __str__(self):
+        return self.Username
 
 class Profile(models.Model):
     MaUser=models.OneToOneField(NguoiDung,on_delete=models.CASCADE,primary_key=True)
@@ -6,7 +20,7 @@ class Profile(models.Model):
     ngaysinh=models.DateField()
     sodienthoai=models.IntegerField()
     diachi=models.CharField(max_length=120)
-    is_Enable=models.BooleanField(defaut=True)
+    is_Enable=models.BooleanField(default=True)
 
     def __str__(self):
         return self.hoten
@@ -75,25 +89,6 @@ class DichVuDaDung(models.Model):
     def __str__(self):
         return f'{self.MaUser} - {self.DichVu.ten}'
 
-class YeuCau_DichVu(models.Model):
-    MaYCTV=models.ForeignKey(YeuCauTuVan,on_delete=models.CASCADE)
-    MaDV=models.ForeignKey(DichVu,on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.YeuCauTuVan.TenKH} - {self.DichVu.ten}'
-class NguoiDung(models.Model):
-    VaiTro_CHOICES = [
-        ('Nhân viên', 'Nhân viên'),
-        ('Khách hàng', 'Khách hàng'),
-    ]
-    MaUser = models.CharField(max_length=10, primary_key=True, editable=False)
-    Username = models.CharField(max_length=100)
-    Password = models.CharField(max_length=30)
-    Email = models.EmailField(max_length=100)
-    VaiTro = models.CharField(max_length=20, choices=VaiTro_CHOICES, default='Khách hàng')
-    def __str__(self):
-        return self.Username
-
 class YeuCauTuVan(models.Model):
     TrangThai_CHOICES = [
         ('Chưa xử lý', 'Chưa xử lý'),
@@ -119,6 +114,13 @@ class YeuCauTuVan(models.Model):
 
     def __str__(self):
         return f"{self.MaYCTV} - {self.TrangThai}"
+
+class YeuCau_DichVu(models.Model):
+    MaYCTV=models.ForeignKey(YeuCauTuVan,on_delete=models.CASCADE)
+    MaDV=models.ForeignKey(DichVu,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.YeuCauTuVan.TenKH} - {self.DichVu.ten}'
 
 class KhieuNaiLichHen(models.Model):
     TrangThai_CHOICES = [
@@ -154,3 +156,48 @@ class LichHenDichVu(models.Model):
 
     def __str__(self):
         return f'{self.DichVu.ten} - {self.LichHen.thoigiandangki}'
+
+class KhieuNai(models.Model):
+    LOAI_KHIEU_NAI_CHOICES = [
+        ('DichVu', 'Dịch vụ'),
+        ('LichHen', 'Lịch hẹn'),
+    ]
+
+    PHUONG_AN_CHOICES = [
+        ('HoanTien', 'Hoàn tiền'),
+        ('SuaChua', 'Sửa chữa'),
+        ('BoiThuong', 'Bồi thường'),
+        ('GiaiThich', 'Giải thích rõ thêm'),
+    ]
+
+    ten = models.CharField(max_length=100)
+    sodienthoai = models.CharField(max_length=15)
+    email = models.EmailField(max_length=100, blank=True, null=True)
+    diachi = models.CharField(max_length=200, blank=True, null=True)
+
+    loai_khieu_nai = models.CharField(max_length=10, choices=LOAI_KHIEU_NAI_CHOICES)
+    ma_hoadon = models.CharField(max_length=100, blank=True, null=True)
+    ngay_su_dung = models.DateField()
+
+    tieude_khieu_nai = models.CharField(max_length=200)
+    mota_chitiet = models.TextField()
+    thoigian_xay_ra = models.DateTimeField()
+    nguoi_lien_quan = models.CharField(max_length=100, blank=True, null=True)
+
+    phuong_an_mong_muon = models.CharField(max_length=20, choices=PHUONG_AN_CHOICES)
+
+    hoa_don_hoac_hop_dong = models.FileField(upload_to='uploads/', blank=True, null=True)
+    hinh_anh_video = models.FileField(upload_to='uploads/', blank=True, null=True)
+
+    cam_ket = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Khiếu nại của {self.ten} - {self.tieude_khieu_nai}"
+
+    class Meta:
+        permissions = [
+            ("can_view_khieu_nai", "Can view khieu nại"),
+            ("can_process_khieu_nai", "Can process khieu nại"),
+            ("can_edit_data_khieu_nai", "Can edit du lieu don khieu nai"),
+            ("can_create_khieu_nai", "Can create don khieu nai"),
+        ]
